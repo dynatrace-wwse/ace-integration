@@ -1,54 +1,10 @@
 # Installation steps & issues
 
 
-## Test 1
-- sudo bash $REPO_PATH/ace/init.sh
 
-Initializing machine ID from D-Bus machine ID.
-/usr/lib/tmpfiles.d/systemd-network.conf:10: Failed to resolve user 'systemd-network': No such process
-/usr/lib/tmpfiles.d/systemd-network.conf:11: Failed to resolve user 'systemd-network': No such process
-/usr/lib/tmpfiles.d/systemd-network.conf:12: Failed to resolve user 'systemd-network': No such process
-/usr/lib/tmpfiles.d/systemd-network.conf:13: Failed to resolve user 'systemd-network': No such process
-/usr/lib/tmpfiles.d/systemd.conf:22: Failed to resolve group 'systemd-journal': No such process
-/usr/lib/tmpfiles.d/systemd.conf:23: Failed to resolve group 'systemd-journal': No such process
-/usr/lib/tmpfiles.d/systemd.conf:28: Failed to resolve group 'systemd-journal': No such process
-/usr/lib/tmpfiles.d/systemd.conf:29: Failed to resolve group 'systemd-journal': No such process
-/usr/lib/tmpfiles.d/systemd.conf:30: Failed to resolve group 'systemd-journal': No such process
+installAceCli 
 
-
-
-INIT - Installing Ansible requirements...
-[ERROR]: The requirements file '/home/root/.ace/ansible_requirements.yml' does not exist.
-
-Could not find /home/root/ansible_collections/ace_box/ace_box.
-
-INIT - Setting up ACE-CLI...
-ERROR: Could not open requirements file: [Errno 2] No such file or directory: '/home/root/.ace/requirements.txt'
-
-## Test 2
-see functoin 
-
-installAceCLi
-
-
-# Configuring / running ace
-
-# Create the ace configuration
-sudo ACE_BOX_USER=vscode \
-  ACE_INGRESS_DOMAIN=localhost.nip.io \
-  ACE_INGRESS_PROTOCOL=http \
-  ace prepare --force
-
-
-# With Dynatrace configuration
-sudo ACE_BOX_USER=vscode \
-  ACE_ANSIBLE_WORKDIR=/workspaces/ace-integration/ace-box/user-skel/ansible/ \
-  ACE_INGRESS_DOMAIN=localhost.nip.io \
-  ACE_INGRESS_PROTOCOL=http \
-  ACE_DT_TENANT=https://your-tenant.live.dynatrace.com \
-  ACE_DT_API_TOKEN=your-api-token \
-  ace prepare --force
-
+configureAceDT
 --------
 
 

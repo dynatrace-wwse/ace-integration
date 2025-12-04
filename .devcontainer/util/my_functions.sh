@@ -91,9 +91,9 @@ configureAceDT(){
   
   sudo ACE_BOX_USER=vscode \
   ACE_ANSIBLE_WORKDIR=$REPO_PATH/ace-box/user-skel/ansible/ \
-  ACE_INGRESS_DOMAIN=enablement.nip.io \
+  ACE_INGRESS_DOMAIN=localhost.nip.io \
   ACE_INGRESS_PROTOCOL=http \
-  ACE_PUBLIC_DOMAIN=enablement.nip.io \
+  ACE_PUBLIC_DOMAIN=localhost.nip.io \
   ACE_DT_TENANT=$DT_ENVIRONMENT \
   ACE_DT_API_TOKEN=$DT_API_TOKEN \
   ACE_DASHBOARD_USER=dynatrace \
