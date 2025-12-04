@@ -14,6 +14,9 @@ ___
 
 test project on integrating two frameworks.
 
+<p align="center">
+<img src="docs/img/ace.png" alt="Alt text" width="400"/>
+</p>
 
 
 Ready to learn how to create an enablement using codespaces? 

@@ -107,3 +107,34 @@ configureAceDT(){
 }
 
 
+assertAceVersion(){
+  local expected_version="${1:-0.2.0}"
+  
+  printInfoSection "Asserting ACE CLI version..."
+  
+  # Check if ace command exists
+  if ! command -v ace &> /dev/null; then
+    printError "ACE CLI is not installed"
+    return 1
+  fi
+  
+  # Get the actual version
+  local version_output=$(ace --version 2>&1)
+  local actual_version=$(echo "$version_output" | grep -oP 'version \K[0-9]+\.[0-9]+\.[0-9]+')
+  
+  if [ -z "$actual_version" ]; then
+    printError "Could not determine ACE CLI version"
+    return 1
+  fi
+  
+  printInfo "Expected version: $expected_version"
+  printInfo "Actual version: $actual_version"
+  
+  if [ "$actual_version" = "$expected_version" ]; then
+    printInfo "✅ ACE CLI version matches expected version ✓"
+    return 0
+  else
+    printError "❌ ACE CLI version mismatch. Expected: $expected_version, Got: $actual_version"
+    return 1
+  fi
+}
