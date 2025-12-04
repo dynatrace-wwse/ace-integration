@@ -13,8 +13,7 @@ jobs:
     timeout-minutes: 20
     env:
       DT_ENVIRONMENT: ${{ secrets.DT_ENVIRONMENT }}
-      DT_OPERATOR_TOKEN: ${{ secrets.DT_OPERATOR_TOKEN }}
-      DT_INGEST_TOKEN: ${{ secrets.DT_INGEST_TOKEN }}
+      DT_API_TOKEN: ${{ secrets.DT_API_TOKEN }}
     steps:
       - name: Commit info
         run: |
@@ -31,8 +30,7 @@ jobs:
             cd .devcontainer 
             cat <<EOF >> runlocal/.env
             DT_ENVIRONMENT=$DT_ENVIRONMENT
-            DT_OPERATOR_TOKEN=$DT_OPERATOR_TOKEN
-            DT_INGEST_TOKEN=$DT_INGEST_TOKEN
+            DT_API_TOKEN=$DT_API_TOKEN
             EOF
             sed -i '/"runArgs": \["--init", "--privileged", "--network=host"\]/c\  "runArgs": ["--init", "--privileged", "--network=host", "--env-file",".devcontainer/runlocal/.env"]' devcontainer.json
       - name: Test Codespace (devcontainer) build and run commands
