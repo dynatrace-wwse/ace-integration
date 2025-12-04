@@ -15,7 +15,7 @@ ___
 test project on integrating two frameworks.
 
 <p align="center">
-<img src="docs/img/ace.png" alt="Alt text" width="400"/>
+<img src="docs/img/ace.png" alt="Alt text" width="200"/>
 </p>
 
 
