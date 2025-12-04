@@ -37,7 +37,6 @@
     helm upgrade --install easytravel "{{ role_path }}/files/helm/easytravel" \
       --namespace "{{ easytravel_namespace }}" \
       --create-namespace \
-      --wait \
       --timeout 10m \
       --set ingress.domain="{{ easytravel_domain }}" \
       --set ingress.class="{{ ingress_class }}" \
