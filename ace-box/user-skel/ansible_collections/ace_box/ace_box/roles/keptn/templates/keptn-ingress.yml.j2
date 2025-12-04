@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keptn-ingress
+  annotations: 
+    kubernetes.io/ingress.class: "{{ ingress_class }}"
+spec:
+  rules:
+  - host: "{{ keptn_ingress_domain }}"
+    http:
+      paths:
+      - backend:
+          service:
+            name: api-gateway-nginx
+            port: 
+              number: 80
+        path: /
+        pathType: ImplementationSpecific

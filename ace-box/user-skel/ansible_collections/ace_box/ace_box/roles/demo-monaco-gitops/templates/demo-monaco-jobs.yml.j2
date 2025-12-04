@@ -1,0 +1,48 @@
+controller:
+  JCasC:
+    configScripts:
+      demo-monaco-jobs-config: |
+        jobs:
+        - script: >
+            folder('{{ demo_jenkins_folder }}')
+        - script: >
+            pipelineJob('{{ demo_jenkins_folder }}/Onboard Application') {
+              parameters {
+                choiceParam('Environment', ['Production','Staging'], 'The environment in which the Application is onboarded.')
+                stringParam('App Name', 'acme_ecommerce_prd', 'The name of the Application to onboard.')
+                stringParam('Application URL pattern', 'http://ecommerce.acme.com', 'URL for application detection rule')
+                stringParam('Kubernetes Namespace', 'acme-ecomm-prd', 'Kubernetes namespace in which the Application is deployed.')
+                stringParam('Health check URL', 'https://dynatrace.com', 'URL for synthetic monitoring')
+                stringParam('Availability SLO', '95.0', 'The target availability SLO percentage.')
+                stringParam('Availability SLO Warning', '97.0', 'The target availability SLO Warning percentage.')
+              }
+              definition {
+                cpsScm {
+                  scriptPath('onboarding.Jenkinsfile')
+                  scm {
+                    git {
+                        remote { 
+                          url('{{ ingress_protocol }}://{{ git_domain }}/{{ demo_org }}/{{ demo_repo }}')
+                          credentials('git-creds-ace')
+                        }
+                        branch('*/main')
+                    }
+                  }
+                  lightweight()
+                }
+              }
+            }
+        - script: >
+            multibranchPipelineJob('{{ demo_jenkins_folder }}/Monaco') {
+              branchSources {
+                git {
+                  id('B8BE0E28-4D53-46B2-BB1C-3BD25CA36LK6')
+                  remote('{{ ingress_protocol }}://{{ git_username }}:{{ git_token }}@{{ git_domain }}/{{ demo_org }}/{{ demo_repo }}.git')
+                }
+              }
+              factory {
+                workflowBranchProjectFactory {
+                  scriptPath('monaco.Jenkinsfile')
+                }
+              }
+            }

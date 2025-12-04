@@ -1,0 +1,52 @@
+# Copyright 2024 Dynatrace LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# Required inputs:
+#   - access_token_var_name: "" # Variables must start with a letter or underscore character, and contain only letters, numbers and underscores. 
+#   - access_token_scope: [""]
+- name: Dynatrace - Create API token
+  block:
+    - uri:
+        url: "{{ dynatrace_tenant_url }}/api/v2/apiTokens"
+        method: POST
+        status_code: [200, 201]
+        body:
+          name: "{{ access_token_var_name }}"
+          scopes: "{{ access_token_scope | list }}"
+        body_format: json
+        headers:
+          Authorization: "Api-Token {{ dynatrace_api_token }}"
+      register: api_token_creation_result
+    - include_role:
+        name: config-v2
+        tasks_from: set-var
+      vars:
+        var_key_to_set: "{{ access_token_var_name }}"
+        var_value_to_set: "{{ api_token_creation_result.json.token }}"
+  when: vars[access_token_var_name] is not defined
+
+- name: Dynatrace - Register API token id
+  block:
+    - set_fact:
+        newTokenId: "{{ {access_token_var_name: api_token_creation_result.json.id} }}"
+    - set_fact:
+        dt_api_token_ids: "{{ dt_api_token_ids | default({}) | combine(newTokenId, recursive=True) }}"
+    - include_role:
+        name: config-v2
+        tasks_from: set-var
+      vars:
+        var_key_to_set: "dt_api_token_ids"
+        var_value_to_set: "{{ dt_api_token_ids }}"
+  when: api_token_creation_result is defined and api_token_creation_result.skipped is not defined

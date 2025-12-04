@@ -1,0 +1,115 @@
+# Copyright 2024 Dynatrace LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+- include_vars:
+    file: "{{ ace_config_file_path }}"
+  tags:
+    - always
+
+- set_fact:
+    is_unconfig: True
+  tags:
+    - unconfig
+    - never
+
+- name: Enable "demo_default"
+  include_tasks: set-var.yml
+  vars:
+    var_key_to_set: "demo_default"
+    var_value_to_set: "{{ not is_unconfig }}"
+  args:
+    apply:
+      tags:
+        - demo_default
+  tags:
+    - demo_default
+    - never
+
+- name: Enable "demo_appsec"
+  include_tasks: set-var.yml
+  vars:
+    var_key_to_set: "demo_appsec"
+    var_value_to_set: "{{ not is_unconfig }}"
+  args:
+    apply:
+      tags:
+        - demo_appsec
+  tags:
+    - demo_appsec
+    - never
+
+- name: Enable "demo_autorem"
+  include_tasks: set-var.yml
+  vars:
+    var_key_to_set: "demo_autorem"
+    var_value_to_set: "{{ not is_unconfig }}"
+  args:
+    apply:
+      tags:
+        - demo_autorem
+  tags:
+    - demo_autorem
+    - never
+
+- name: Enable "hot_appsec"
+  include_tasks: set-var.yml
+  vars:
+    var_key_to_set: "hot_appsec"
+    var_value_to_set: "{{ not is_unconfig }}"
+  args:
+    apply:
+      tags:
+        - hot_appsec
+  tags:
+    - hot_appsec
+    - never
+# - name: Enable "monaco_gitops"
+#   include_tasks: set-var.yml
+#   vars:
+#   - var_key_to_set: "monaco_gitops"
+#   - var_value_to_set: "{{ not is_unconfig }}"
+#   args:
+#     apply:
+#       tags:
+#         - monaco_gitops
+#   tags:
+#   - monaco_gitops
+#   - never
+
+# - name: Enable "quality_gates"
+#   include_tasks: set-var.yml
+#   vars:
+#   - var_key_to_set: "quality_gates"
+#   - var_value_to_set: "{{ not is_unconfig }}"
+#   args:
+#     apply:
+#       tags:
+#         - quality_gates
+#   tags:
+#   - quality_gates
+#   - never
+
+# - name: Enable "auto_remediation"
+#   include_tasks: set-var.yml
+#   vars:
+#   - var_key_to_set: "auto_remediation"
+#   - var_value_to_set: "{{ not is_unconfig }}"
+#   args:
+#     apply:
+#       tags:
+#         - auto_remediation
+#   tags:
+#   - auto_remediation
+#   - never

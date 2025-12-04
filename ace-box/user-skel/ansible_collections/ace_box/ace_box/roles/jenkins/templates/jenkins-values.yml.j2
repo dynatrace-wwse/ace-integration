@@ -1,0 +1,256 @@
+controller:
+  tag: {{ jenkins_version }}
+  numExecutors: 2
+  admin:
+    existingSecret: jenkins-admin
+    userKey: jenkins_username
+    passwordKey: jenkins_password
+  ingress:
+    enabled: true
+    hostName: {{ jenkins_domain }}
+    annotations:
+      kubernetes.io/ingress.class: {{ ingress_class }}
+{% if ingress_protocol is defined and ingress_protocol == "https" %}
+      nginx.ingress.kubernetes.io/proxy-redirect-from: http
+      nginx.ingress.kubernetes.io/proxy-redirect-to: https
+{% endif %}
+  jenkinsUrlProtocol: {{ ingress_protocol }}
+  installPlugins:
+    - command-launcher:84.v4a_97f2027398
+    - kubernetes:3697.v771155683e38
+    - kubernetes-credentials-provider:1.196.va_55f5e31e3c2
+    - workflow-job:1189.va_d37a_e9e4eda_
+    - workflow-scm-step:400.v6b_89a_1317c9a_
+    - workflow-cps-global-lib:588.v576c103a_ff86
+    - pipeline-model-api:2.2114.v2654ca_721309
+    - workflow-aggregator:2.6
+    - credentials-binding:523.vd859a_4b_122e6
+    - git:4.11.5
+    - git-client:3.11.2
+    - google-oauth-plugin:1.0.6
+    - google-source-plugin:0.4
+    - performance:3.20
+    - github-branch-source:1687.v7618247e672d
+    - job-dsl:1.81
+    - pipeline-build-step:2.18
+    - docker-plugin:1.2.9
+    - docker-commons:1.21
+    - blueocean:1.25.6
+    - configuration-as-code:1512.vb_79d418d5fc8
+    - http_request:1.16
+    - pipeline-utility-steps:2.13.0
+    - ansible:1.1
+    - gitea:1.4.3
+    - github:1.34.5
+    - cloudbees-bitbucket-branch-source:785.ve724eb_44e286
+    - favorite:2.4.1
+    - junit:1119.1121.vc43d0fc45561
+    - lockable-resources:2.16
+    - pipeline-input-step:449.v77f0e8b_845c4
+    - opentelemetry:2.7.1
+  installLatestPlugins: false
+  JCasC:
+    enabled: true
+    defaultConfig: true
+    configScripts:
+      jenkins-node-config: |
+        jenkins:
+          agentProtocols:
+          - "JNLP4-connect"
+          - "Ping"
+          systemMessage: Welcome to the ACE BOX CI\CD server.  This Jenkins is configured and managed 'as code'.
+          globalNodeProperties:
+          - envVars:
+              env:
+{% if ingress_protocol is defined and ingress_protocol != "" %}
+              - key: "INGRESS_PROTOCOL"
+                value: "{{ ingress_protocol }}"
+              - key: "GIT_PROTOCOL"
+                value: "{{ ingress_protocol }}"
+{% endif %}
+{% if ingress_class is defined and ingress_class != "" %}
+              - key: "INGRESS_CLASS"
+                value: "{{ ingress_class }}"
+{% endif %}
+{% if ingress_domain is defined and ingress_domain != "" %}
+              - key: "INGRESS_DOMAIN"
+                value: "{{ ingress_domain }}"
+{% endif %}
+{% if registry_url is defined and registry_url != "" %}
+              - key: "DOCKER_REGISTRY_URL"
+                value: "{{ registry_url }}"
+{% endif %}
+{% if git_domain is defined and git_domain != "" %}
+              - key: "GIT_DOMAIN"
+                value: "{{ git_domain }}"
+{% endif %}
+{% if dt_synthetic_node_id is defined and dt_synthetic_node_id != "" %}
+              - key: "SYNTH_NODE_ID"
+                value: "{{ dt_synthetic_node_id }}"
+{% endif %}
+{% if git_org_demo is defined and git_org_demo != "" %}
+              - key: "GIT_ORG_DEMO"
+                value: "{{ git_org_demo }}"
+{% endif %}
+{% if git_repo_demo is defined and git_repo_demo != "" %}
+              - key: "GIT_REPO_DEMO"
+                value: "{{ git_repo_demo }}"
+{% endif %}
+{% if keptn_endpoint is defined and keptn_endpoint != "" %}
+              - key: "KEPTN_ENDPOINT"
+                value: "{{ keptn_endpoint | default(None) | replace("/api","") }}"
+{% endif %}
+{% if keptn_bridge is defined and keptn_bridge != "" %}
+              - key: "KEPTN_BRIDGE"
+                value: "{{ keptn_bridge }}"
+{% endif %}
+{% if host_group is defined and host_group != "" %}
+              - key: "HOST_GROUP"
+                value: "{{ host_group }}"
+{% endif %}
+{% if dt_environment_url_gen3 is defined and dt_environment_url_gen3 != "" %}
+              - key: "DYNATRACE_URL_GEN3"
+                value: "{{ dt_environment_url_gen3.rstrip('/') }}"
+{% endif %}
+      library-config: |
+        unclassified:
+          giteaServers:
+            servers:
+            - credentialsId: "git-creds-ace"
+              displayName: "gitea-acebox"
+              manageHooks: true
+              serverUrl: "{{ ingress_protocol }}://{{ git_domain }}"
+          globalLibraries:
+            libraries:
+            - name: "keptn-library"
+              retriever:
+                modernSCM:
+                  scm:
+                    git:
+                      remote: "https://github.com/keptn-sandbox/keptn-jenkins-library.git"
+                      traits:
+                      - "gitBranchDiscovery"
+            - name: "ace"
+              retriever:
+                modernSCM:
+                  scm:
+                    git:
+                      remote: "https://github.com/dynatrace-ace/dynatrace-jenkins-library.git"
+                      traits:
+                      - "gitBranchDiscovery"
+            - name: "jenkinstest"
+              retriever:
+                modernSCM:
+                  scm:
+                    git:
+                      remote: "https://github.com/dynatrace-ace/jenkins-test-library"
+                      traits:
+                      - "gitBranchDiscovery"
+          openTelemetry:
+            authentication: "noAuthentication"
+            disabledResourceProviders: "io.opentelemetry.sdk.extension.resources.ProcessResourceProvider"
+            endpoint: "{{ otel_endpoint }}"
+            exportOtelConfigurationAsEnvironmentVariables: false
+            ignoredSteps: "dir,echo,isUnix,pwd,properties"
+            observabilityBackends:
+            - customObservabilityBackend:
+                name: "Dynatrace"
+                traceVisualisationUrlTemplate: "{{ dynatrace_tenant_url | default(None) }}/#trace;gf=all;traceId=^${traceId};timeframe=last7d"
+            - dynatrace:
+                url: "{{ dynatrace_tenant_url | default(None) }}"
+            serviceName: "jenkins"
+            serviceNamespace: "jenkins"
+      credentials-config: |
+        credentials:
+          system:
+            domainCredentials:
+              - credentials:
+{% if dt_oauth_sso_endpoint is defined and dt_oauth_sso_endpoint != "" %}
+                - string:
+                    id: "DYNATRACE_SSO_URL"
+                    description: ""
+                    scope: GLOBAL
+                    secret: "{{ dt_oauth_sso_endpoint.rstrip('/') }}"
+{% endif %}
+{% if dt_oauth_client_id is defined and dt_oauth_client_id != "" %}
+                - string:
+                    id: "DYNATRACE_CLIENT_ID"
+                    description: ""
+                    scope: GLOBAL
+                    secret: "{{ dt_oauth_client_id }}"
+{% endif %}
+{% if dt_oauth_client_secret is defined and dt_oauth_client_secret != "" %}
+                - string:
+                    id: "DYNATRACE_SECRET"
+                    description: ""
+                    scope: GLOBAL
+                    secret: "{{ dt_oauth_client_secret }}"
+{% endif %}
+{% if dt_oauth_account_urn is defined and dt_oauth_account_urn != "" %}
+                - string:
+                    id: "ACCOUNT_URN"
+                    description: ""
+                    scope: GLOBAL
+                    secret: "{{ dt_oauth_account_urn }}"
+{% endif %}                    
+{% if git_username is defined and git_username != "" and git_password is defined and git_password != "" %}
+                - usernamePassword:
+                    id: "git-creds-ace"
+                    scope: GLOBAL
+                    description: "Git credentials"
+                    username: "{{ git_username }}"
+                    password: "{{ git_password }}"
+{% endif %}
+{% if git_access_token is defined and git_access_token != "" %}
+                - string:
+                    id: "git-access-token"
+                    description: "Git Personal Access Token"
+                    scope: GLOBAL
+                    secret: "{{ git_access_token }}"
+{% endif %}
+{% if keptn_api_token is defined and keptn_api_token != "" %}
+                - string:
+                    id: "KEPTN_API_TOKEN"
+                    scope: GLOBAL
+                    description: "Cloud Automation api token"
+                    secret: "{{ keptn_api_token }}"
+{% endif %}
+{% if dynatrace_tenant_url is defined and dynatrace_tenant_url != "" %}
+                - string:
+                    id: "DT_TENANT_URL"
+                    scope: GLOBAL
+                    description: "Dynatrace environment URL"
+                    secret: "{{ dynatrace_tenant_url }}"
+{% endif %}
+{% if vars[jenkins_dt_access_token_name] is defined and vars[jenkins_dt_access_token_name] != "" %}
+                - string:
+                    id: "DT_API_TOKEN"
+                    scope: GLOBAL
+                    description: "Dynatrace api token"
+                    secret: "{{ vars[jenkins_dt_access_token_name] }}"
+{% endif %}
+      clouds-container-config: |
+        jenkins:
+          clouds:
+          - kubernetes:
+              name: "ACE"
+              containerCapStr: "10"
+              jenkinsTunnel: "jenkins-agent:50000"
+              jenkinsUrl: "http://jenkins:8080"
+              maxRequestsPerHostStr: "32"
+              serverUrl: "https://kubernetes.default"
+              templates:
+{% include 'container-nodejs.yml.j2' %}
+
+{% include 'container-ace.yml.j2' %}
+
+{% include 'container-kubegit.yml.j2' %}
+
+{% include 'container-dta.yml.j2' %}
+
+{% include 'container-locust.yml.j2' %}
+
+{% include 'container-monaco.yml.j2' %}
+
+{% include 'container-cloud-automation.yml.j2' %}
+

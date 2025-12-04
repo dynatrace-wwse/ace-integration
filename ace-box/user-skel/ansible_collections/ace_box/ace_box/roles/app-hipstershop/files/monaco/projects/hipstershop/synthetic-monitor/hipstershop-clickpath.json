@@ -1,0 +1,420 @@
+{
+  "name": "{{ .name }}",
+  "frequencyMin": {{ .frequencyInMin }},
+  "enabled": {{ .enabled }},
+  "type": "BROWSER",
+  "createdFrom": "API",
+  "script": {
+    "type": "clickpath",
+    "version": "1.0",
+    "configuration": {
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36",
+      "device": {
+        "deviceName": "Desktop",
+        "orientation": "landscape"
+      },
+      "chromiumStartupFlags": {
+        "disable-web-security": false
+      },
+      "ignoredErrorCodes": {
+        "statusCodes": "403",
+        "matchingDocumentRequests": "/ui"
+      }
+    },
+    "events": [
+      {
+        "type": "navigate",
+        "description": "Loading of \"{{ .url }}\"",
+        "url": "{{ .url }}",
+        "wait": {
+          "waitFor": "page_complete"
+        }
+      },
+      {
+        "type": "click",
+        "description": "click",
+        "target": {
+          "locators": [
+            {
+              "type": "css",
+              "value": "a[href$=\"/product/OLJCESPC7Z\"]"
+            },
+            {
+              "type": "css",
+              "value": ".hot-product-card-img-overlay:eq(0)"
+            },
+            {
+              "type": "css",
+              "value": "html body:nth-child(2) main:nth-child(3) div:nth-child(2) div div:nth-child(2) div div:nth-child(2) a div:nth-child(2)"
+            },
+            {
+              "type": "css",
+              "value": "body main.home div.container-fluid div.row div.col-12 div.row div.col-md-4 a div.hot-product-card-img-overlay:eq(0)"
+            }
+          ]
+        },
+        "button": 0,
+        "wait": {
+          "waitFor": "page_complete"
+        }
+      },
+      {
+        "type": "click",
+        "description": "click on \"Add To Cart\"",
+        "target": {
+          "locators": [
+            {
+              "type": "css",
+              "value": "button[type=\"submit\"]"
+            },
+            {
+              "type": "css",
+              "value": "button:contains(\"Add To Cart\")"
+            },
+            {
+              "type": "css",
+              "value": ".cymbal-button-primary"
+            },
+            {
+              "type": "css",
+              "value": "html body:nth-child(2) main:nth-child(3) div div div:nth-child(2) div form:nth-child(4) button:nth-child(3)"
+            },
+            {
+              "type": "css",
+              "value": "body main div.h-product div.row div.product-info div.product-wrapper form button.cymbal-button-primary"
+            }
+          ]
+        },
+        "button": 0,
+        "wait": {
+          "waitFor": "page_complete"
+        }
+      },
+      {
+        "type": "click",
+        "description": "click on \"Continue Shopping\"",
+        "target": {
+          "locators": [
+            {
+              "type": "css",
+              "value": "a:contains(\"Continue Shopping\")"
+            },
+            {
+              "type": "css",
+              "value": ".cymbal-button-primary:eq(0)"
+            },
+            {
+              "type": "css",
+              "value": "html body:nth-child(2) main:nth-child(3) section div div div div:nth-child(2) form a:nth-child(2)"
+            },
+            {
+              "type": "css",
+              "value": "body main.cart-sections section.container div.row div.col-lg-6 div.row div.col-8 form a.cymbal-button-primary"
+            }
+          ]
+        },
+        "button": 0,
+        "wait": {
+          "waitFor": "page_complete"
+        }
+      },
+      {
+        "type": "click",
+        "description": "click",
+        "target": {
+          "locators": [
+            {
+              "type": "css",
+              "value": "a[href$=\"/product/6E92ZMYYFZ\"]"
+            },
+            {
+              "type": "css",
+              "value": ".hot-product-card-img-overlay:eq(8)"
+            },
+            {
+              "type": "css",
+              "value": "html body:nth-child(2) main:nth-child(3) div:nth-child(2) div div:nth-child(2) div div:nth-child(10) a div:nth-child(2)"
+            },
+            {
+              "type": "css",
+              "value": "body main.home div.container-fluid div.row div.col-12 div.row div.col-md-4 a div.hot-product-card-img-overlay:eq(8)"
+            }
+          ]
+        },
+        "button": 0,
+        "wait": {
+          "waitFor": "page_complete"
+        }
+      },
+      {
+        "type": "click",
+        "description": "click",
+        "target": {
+          "locators": [
+            {
+              "type": "css",
+              "value": "a[href$=\"/product/66VCHSJNUP\"]"
+            },
+            {
+              "type": "css",
+              "value": "img[src$=\"/static/img/products/tank-top.jpg\"]"
+            },
+            {
+              "type": "css",
+              "value": "html body:nth-child(2) main:nth-child(3) div:nth-child(2) section div div div div:nth-child(2) div:nth-child(3) div a img"
+            },
+            {
+              "type": "css",
+              "value": "body main div section.recommendations div.container div.row div.col-xl-10 div.row div.col-md-3 div a img:eq(2)"
+            }
+          ]
+        },
+        "button": 0,
+        "wait": {
+          "waitFor": "page_complete"
+        }
+      },
+      {
+        "type": "click",
+        "description": "click on \"Add To Cart\"",
+        "target": {
+          "locators": [
+            {
+              "type": "css",
+              "value": "button[type=\"submit\"]"
+            },
+            {
+              "type": "css",
+              "value": "button:contains(\"Add To Cart\")"
+            },
+            {
+              "type": "css",
+              "value": ".cymbal-button-primary"
+            },
+            {
+              "type": "css",
+              "value": "html body:nth-child(2) main:nth-child(3) div div div:nth-child(2) div form:nth-child(4) button:nth-child(3)"
+            },
+            {
+              "type": "css",
+              "value": "body main div.h-product div.row div.product-info div.product-wrapper form button.cymbal-button-primary"
+            }
+          ]
+        },
+        "button": 0,
+        "wait": {
+          "waitFor": "page_complete"
+        }
+      },
+      {
+        "type": "click",
+        "description": "click on \"Place Order\"",
+        "target": {
+          "locators": [
+            {
+              "type": "css",
+              "value": "button[type=\"submit\"]:eq(1)"
+            },
+            {
+              "type": "css",
+              "value": "button:contains(\"Place Order\")"
+            },
+            {
+              "type": "css",
+              "value": ".cymbal-button-primary:eq(1)"
+            },
+            {
+              "type": "css",
+              "value": "html body:nth-child(2) main:nth-child(3) section div div:nth-child(2) form div:nth-child(10) div button"
+            },
+            {
+              "type": "css",
+              "value": "body main.cart-sections section.container div.row div.col-lg-5 form.cart-checkout-form div.form-row div.col button.cymbal-button-primary"
+            }
+          ]
+        },
+        "button": 0,
+        "wait": {
+          "waitFor": "page_complete"
+        }
+      },
+      {
+        "type": "click",
+        "description": "click",
+        "target": {
+          "locators": [
+            {
+              "type": "css",
+              "value": "a[href$=\"/product/9SIQT8TOJO\"]"
+            },
+            {
+              "type": "css",
+              "value": "img[src$=\"/static/img/products/bamboo-glass-jar.jpg\"]"
+            },
+            {
+              "type": "css",
+              "value": "html body:nth-child(2) main:nth-child(3) section:nth-child(2) div div div div:nth-child(2) div:nth-child(4) div a img"
+            },
+            {
+              "type": "css",
+              "value": "body main.order section.recommendations div.container div.row div.col-xl-10 div.row div.col-md-3 div a img:eq(3)"
+            }
+          ]
+        },
+        "button": 0,
+        "wait": {
+          "waitFor": "page_complete"
+        }
+      },
+      {
+        "type": "click",
+        "description": "click on \"Add To Cart\"",
+        "target": {
+          "locators": [
+            {
+              "type": "css",
+              "value": "button[type=\"submit\"]"
+            },
+            {
+              "type": "css",
+              "value": "button:contains(\"Add To Cart\")"
+            },
+            {
+              "type": "css",
+              "value": ".cymbal-button-primary"
+            },
+            {
+              "type": "css",
+              "value": "html body:nth-child(2) main:nth-child(3) div div div:nth-child(2) div form:nth-child(4) button:nth-child(3)"
+            },
+            {
+              "type": "css",
+              "value": "body main div.h-product div.row div.product-info div.product-wrapper form button.cymbal-button-primary"
+            }
+          ]
+        },
+        "button": 0,
+        "wait": {
+          "waitFor": "page_complete"
+        }
+      },
+      {
+        "type": "click",
+        "description": "click on \"Empty Cart\"",
+        "target": {
+          "locators": [
+            {
+              "type": "css",
+              "value": "button[type=\"submit\"]:eq(0)"
+            },
+            {
+              "type": "css",
+              "value": "button:contains(\"Empty Cart\")"
+            },
+            {
+              "type": "css",
+              "value": ".cymbal-button-secondary"
+            },
+            {
+              "type": "css",
+              "value": "html body:nth-child(2) main:nth-child(3) section div div div div:nth-child(2) form button"
+            },
+            {
+              "type": "css",
+              "value": "body main.cart-sections section.container div.row div.col-lg-6 div.row div.col-8 form button.cymbal-button-secondary"
+            }
+          ]
+        },
+        "button": 0,
+        "wait": {
+          "waitFor": "page_complete"
+        }
+      }
+    ]
+  },
+  "locations": [
+    "{{ .location }}"
+  ],
+  "anomalyDetection": {
+    "outageHandling": {
+      "globalOutage": "{{ .globalOutage }}",
+      "globalOutagePolicy": {
+        "consecutiveRuns": 1
+      },
+      "localOutage": "{{ .localOutage }}",
+      "localOutagePolicy": {
+        "affectedLocations": 1,
+        "consecutiveRuns": 3
+      },
+      "retryOnError": true
+    },
+    "loadingTimeThresholds": {
+      "enabled": true,
+      "thresholds": []
+    }
+  },
+  "tags": [
+    "{{ .tag }}"
+  ],
+  "managementZones": [
+    "{{ .managementZoneId }}"
+  ],
+  "automaticallyAssignedApps": [],
+  "manuallyAssignedApps": [
+    "{{ .applicationId }}"
+  ],
+  "keyPerformanceMetrics": {
+    "loadActionKpm": "VISUALLY_COMPLETE",
+    "xhrActionKpm": "VISUALLY_COMPLETE"
+  },
+  "events": [
+    {
+      "name": "Loading of \"http://hipstershop.34.76.75.83.nip.io\"",
+      "sequenceNumber": 1
+    },
+    {
+      "name": "click",
+      "sequenceNumber": 2
+    },
+    {
+      "name": "click on \"navLoginRegisterButton\"",
+      "sequenceNumber": 2
+    },
+    {
+      "name": "click on \"Add To Cart\"",
+      "sequenceNumber": 3
+    },
+    {
+      "name": "click on \"Continue Shopping\"",
+      "sequenceNumber": 4
+    },
+    {
+      "name": "click",
+      "sequenceNumber": 5
+    },
+    {
+      "name": "click",
+      "sequenceNumber": 6
+    },
+    {
+      "name": "click on \"Add To Cart\"",
+      "sequenceNumber": 7
+    },
+    {
+      "name": "click on \"Place Order\"",
+      "sequenceNumber": 8
+    },
+    {
+      "name": "click",
+      "sequenceNumber": 9
+    },
+    {
+      "name": "click on \"Add To Cart\"",
+      "sequenceNumber": 10
+    },
+    {
+      "name": "click on \"Empty Cart\"",
+      "sequenceNumber": 11
+    }
+  ]
+}

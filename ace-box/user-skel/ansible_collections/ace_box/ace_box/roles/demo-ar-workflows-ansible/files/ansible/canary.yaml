@@ -1,0 +1,83 @@
+# Copyright 2024 Dynatrace LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+- name: Canary
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Increment canary weight
+      vars:
+        payload:
+          parameter:
+            - name: OLD_WEIGHT
+              value: "{{ item.oldWeight }}"
+            - name: CANARY_WEIGHT
+              value: "{{ item.canaryWeight }}"
+            - name: REMEDIATION_ACTION
+              value: "{{ remediation_template_id }}"
+            - name: REMEDIATION_TYPE
+              value: "ansible"
+            - name: RELEASE_PRODUCT
+              value: "simplenodeservice"
+            - name: RELEASE_STAGE
+              value: "canary-jenkins"
+      ansible.builtin.uri:
+        url: "{{ jenkins_url }}"
+        method: POST
+        url_username: "{{ jenkins_user }}"
+        url_password: "{{ jenkins_token }}"
+        force_basic_auth: true
+        body_format: form-urlencoded
+        body:
+          json: "{{ payload | to_json }}"
+        status_code: 201
+      loop:
+        - oldWeight: 70
+          canaryWeight: 30
+        - oldWeight: 30
+          canaryWeight: 70
+        - oldWeight: 0
+          canaryWeight: 100
+      loop_control:
+        pause: 120
+
+    - name: Reset canary weight to 0
+      vars:
+        payload:
+          parameter:
+            - name: OLD_WEIGHT
+              value: "100"
+            - name: CANARY_WEIGHT
+              value: "0"
+            - name: REMEDIATION_ACTION
+              value: "NA"
+            - name: REMEDIATION_TYPE
+              value: "ansible"
+            - name: RELEASE_PRODUCT
+              value: "simplenodeservice"
+            - name: RELEASE_STAGE
+              value: "canary-jenkins"
+      ansible.builtin.uri:
+        url: "{{ jenkins_url }}"
+        method: POST
+        url_username: "{{ jenkins_user }}"
+        url_password: "{{ jenkins_token }}"
+        force_basic_auth: true
+        body_format: form-urlencoded
+        body:
+          json: "{{ payload | to_json }}"
+        status_code: 201
+      tags:
+        - canary_reset

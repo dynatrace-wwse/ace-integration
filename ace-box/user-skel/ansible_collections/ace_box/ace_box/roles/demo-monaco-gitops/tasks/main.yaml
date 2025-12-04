@@ -1,0 +1,92 @@
+# Copyright 2024 Dynatrace LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+- include_role:
+    name: k3s
+
+- include_role:
+    name: dt-activegate-classic
+  vars:
+    activegate_install_synthetic: true
+
+- include_role:
+    name: dt-operator
+  vars:
+    dt_operator_release: "v1.2.3"
+    operator_mode: "classicFullStack" 
+
+- include_role:
+    name: monaco-v2
+
+- include_role:
+    name: gitea
+
+- include_role:
+    name: gitea
+    tasks_from: source-secret
+  when: gitea_access_token is not defined or gitea_username is not defined or gitea_password is not defined
+
+- include_role:
+    name: gitea
+    tasks_from: create-organization
+  vars:
+    gitea_org: "{{ demo_monaco_gitops_org }}"
+
+- include_role:
+    name: gitea
+    tasks_from: create-repository
+  vars:
+    gitea_org: "{{ demo_monaco_gitops_org }}"
+    gitea_repo: "{{ demo_monaco_gitops_repo_name }}"
+
+- include_role:
+    name: repository
+  vars:
+    repo_src: "{{ item.repo_src }}"
+    git_org: "{{ item.git_org }}"
+    git_repo: "{{ item.repo_target }}"
+    git_username: "{{ gitea_username }}"
+    git_password: "{{ gitea_password }}"
+    git_remote: "gitea"
+  loop:
+  - { repo_target: "{{ demo_monaco_gitops_repo_name }}", repo_src: "{{ role_path }}/files/repos/monaco", git_org: "{{ demo_monaco_gitops_org }}" }
+  when: new_repo_created is defined and new_repo_created == true
+
+- include_role:
+    name: otel-collector
+
+# Include use case specific Jenkins values
+- set_fact:
+    include_jenkins_value_file: "{{ role_path }}/templates/demo-monaco-jobs.yml.j2"
+
+- include_role:
+    name: jenkins
+    tasks_from: template-values-file
+  vars:
+    demo_repo: "{{ demo_monaco_gitops_repo_name }}"
+    demo_org: "{{ demo_monaco_gitops_org }}"
+    demo_jenkins_folder: "{{ demo_monaco_gitops_folder }}"
+    git_username: "{{ gitea_username }}"
+    git_token: "{{ gitea_access_token }}"
+    git_domain: "gitea.{{ ingress_domain }}"
+
+- include_role:
+    name: jenkins
+
+- include_role:
+    name: dashboard
+
+- include_tasks:
+    file: health-check.yml

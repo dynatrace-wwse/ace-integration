@@ -1,0 +1,35 @@
+# Copyright 2024 Dynatrace LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app.kubernetes.io/name: "{{ .Release.Name }}"             # The name of the application, e.g. "mysql"
+    app.kubernetes.io/instance: "{{ .Release.Name }}"         # A unique name identifying the instance of an application, e.g. "mysql-abcxzy"
+    app.kubernetes.io/version: "{{ .Values.build_version }}"  # The current version of the application (e.g., a SemVer 1.0, revision hash, etc.), e.g. "5.7.21"
+    app.kubernetes.io/component: "webservice"                 # The component within the architecture, e.g. "database"
+    app.kubernetes.io/part-of: "{{ .Chart.Name }}"          # The name of a higher level application this one is part of, e.g. wordpress
+    app.kubernetes.io/managed-by: "helm"                      # The tool being used to manage the operation of an application, e.g. helm
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+  selector:
+    app.kubernetes.io/name: "{{ .Release.Name }}" 
+    app.kubernetes.io/version: "{{ .Values.build_version }}"
+  type: NodePort

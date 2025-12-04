@@ -1,0 +1,63 @@
+# Copyright 2024 Dynatrace LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+- include_role:
+    name: awx
+    tasks_from: source-secrets
+
+- include_role:
+    name: jenkins
+    tasks_from: ensure-credentials
+  vars:
+    credentials_value: "{{ [awx_admin_username, awx_admin_password] | join(':') | b64encode }}"
+    credentials_id: "AWX_BASIC_AUTH"
+    credentials_description: "AWX_BASIC_AUTH"
+    credentials_class: StringCredentialsImpl
+
+- include_role:
+    name: jenkins
+    tasks_from: ensure-credentials
+  vars:
+    credentials_value: "{{ extra_vars.dt_oauth_client_id }}"
+    credentials_id: "DT_OAUTH_CLIENT_ID"
+    credentials_description: "DT_OAUTH_CLIENT_ID"
+    credentials_class: StringCredentialsImpl
+
+- include_role:
+    name: jenkins
+    tasks_from: ensure-credentials
+  vars:
+    credentials_value: "{{ extra_vars.dt_oauth_client_secret }}"
+    credentials_id: "DT_OAUTH_CLIENT_SECRET"
+    credentials_description: "DT_OAUTH_CLIENT_SECRET"
+    credentials_class: StringCredentialsImpl
+
+- include_role:
+    name: jenkins
+    tasks_from: ensure-credentials
+  vars:
+    credentials_value: "{{ extra_vars.dt_oauth_sso_endpoint.rstrip('/') }}"
+    credentials_id: "DT_OAUTH_SSO_ENDPOINT"
+    credentials_description: "DT_OAUTH_SSO_ENDPOINT"
+    credentials_class: StringCredentialsImpl
+
+- include_role:
+    name: jenkins
+    tasks_from: ensure-credentials
+  vars:
+    credentials_value: "{{ awx_controller_token }}"
+    credentials_id: "AWX_CONTROLLER_TOKEN"
+    credentials_description: "AWX_CONTROLLER_TOKEN"
+    credentials_class: StringCredentialsImpl

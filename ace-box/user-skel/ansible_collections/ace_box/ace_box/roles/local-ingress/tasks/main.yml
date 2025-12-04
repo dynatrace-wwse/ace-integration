@@ -1,0 +1,28 @@
+# Copyright 2024 Dynatrace LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- name: Deploy Local Ingress
+  kubernetes.core.helm:
+    name: "{{ local_ingress_name if local_ingress_name != 'local-ingress' else ('local-ingress-' + lookup('community.general.random_string', upper=false, numbers=false, special=false, length=5)) }}"
+    chart_ref: "{{ role_path }}/files/local-ingress/helm/local-ingress"
+    release_namespace: "{{ local_ingress_namespace | default('ingress')}}"
+    create_namespace: true
+    wait: true
+    wait_timeout: 10m
+    values:
+      private_ip: "{{ local_private_ip | default(ansible_default_ipv4.address) }}"
+      local_port: "{{ local_ingress_port | default('8080')}}"
+      ingress:
+        domain: "{{ local_ingress_domain }}"
+        class: "{{ local_ingress_class | default(ingress_class) }}"

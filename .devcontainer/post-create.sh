@@ -5,34 +5,19 @@ source .devcontainer/util/source_framework.sh
 
 setUpTerminal
 
-startKindCluster
+#startKindCluster
 
-installK9s
-
-#TODO: BeforeGoLive: uncomment this. This is only needed for professors to have the Mkdocs live in the container
+#installK9s
 
 #installMkdocs
 
-
-# Dynatrace Operator can be deployed automatically
 #dynatraceDeployOperator
 
-# You can deploy CNFS or AppOnly
 #deployCloudNative
-#deployApplicationMonitoring
 
-# In here you deploy the Application you want
-# The TODO App will be deployed as a sample
-deployTodoApp
+installAceCli
 
-# The Astroshop keeping changes of demo.live needs certmanagerdocker
-#certmanagerInstall
-#certmanagerEnable
-#deployAstroshop
-
-# If you want to deploy your own App, just create a function in the functions.sh file and call it here.
-# deployMyCustomApp
-
+configureAceDT
 # If the Codespace was created via Workflow end2end test will be done, otherwise
 # it'll verify if there are error in the logs and will show them in the greeting as well a monitoring 
 # notification will be sent on the instantiation details

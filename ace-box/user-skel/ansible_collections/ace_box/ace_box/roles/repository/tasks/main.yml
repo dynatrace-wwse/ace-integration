@@ -1,0 +1,74 @@
+# Copyright 2024 Dynatrace LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+- ansible.builtin.command: git init
+  args:
+    chdir: "{{ repo_src }}"
+
+- ansible.builtin.command: git checkout -b main
+  args:
+    chdir: "{{ repo_src }}"
+  ignore_errors: true
+
+- ansible.builtin.command: git add .
+  args:
+    chdir: "{{ repo_src }}"
+
+- ansible.builtin.command: git commit -m "Init repo. Have fun!"
+  args:
+    chdir: "{{ repo_src }}"
+  ignore_errors: true
+
+- name: Source Gitea endpoints
+  block:
+  - include_role:
+      name: gitea
+      tasks_from: source-endpoints
+    when: gitea_internal_endpoint is not defined
+  - set_fact:
+      git_endpoint: "{{ gitea_internal_endpoint | regex_replace(\"http://\") }}"
+  when: git_remote == "gitea"
+
+- name: Source Gitlab endpoints
+  block:
+  - include_role:
+      name: gitlab
+      tasks_from: source-endpoints
+    when: gitlab_internal_endpoint is not defined
+  - set_fact:
+      git_endpoint: "{{ gitlab_internal_endpoint | regex_replace(\"http://\") }}"
+  when: git_remote == "gitlab"
+
+- block:
+    - name: "Add remote {{ git_remote }}"
+      ansible.builtin.command: "git remote add {{ git_remote }} http://{{ git_username }}:{{ git_password }}@{{ git_endpoint }}/{{ git_org }}/{{ git_repo }}.git"
+      args:
+        chdir: "{{ repo_src }}"
+  rescue:
+    - name: "Set remote {{ git_remote }}"
+      ansible.builtin.command: "git remote set-url {{ git_remote }} http://{{ git_username }}:{{ git_password }}@{{ git_endpoint }}/{{ git_org }}/{{ git_repo }}.git"
+      args:
+        chdir: "{{ repo_src }}"
+
+- name: "Publish repo"
+  ansible.builtin.command: "git push {{ git_remote }} main"
+  args:
+    chdir: "{{ repo_src }}"
+
+- name: "Set upstream tracking"
+  ansible.builtin.command: "git branch --set-upstream-to={{ git_remote }}/main main"
+  args:
+    chdir: "{{ repo_src }}"
+  when: track_upstream

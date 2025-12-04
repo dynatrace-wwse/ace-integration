@@ -1,0 +1,43 @@
+# Copyright 2024 Dynatrace LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+- include_role:
+    name: dt-access-token
+  vars:
+    access_token_var_name: "{{ activegate_dt_access_token_name }}"
+    access_token_scope: ["InstallerDownload","ExternalSyntheticIntegration"] 
+
+- name: Download ActiveGate installer
+  get_url:
+    url: "{{ dynatrace_tenant_url }}/api/v1/deployment/installer/gateway/unix/latest?arch=x86&flavor=default"
+    dest: "{{ activegate_download_location }}"
+    mode: +x
+    timeout: 300
+    headers:
+      Authorization: "Api-token {{ vars[activegate_dt_access_token_name] }}"
+  when: not activegate_download_location is exists
+
+# Loads a list of services which is used to termine
+# whether the AG is installed already
+- service_facts:
+
+- become: true
+  become_user: root
+  block:
+  - include_tasks: install.yml
+  rescue:
+  - include_tasks: uninstall.yml
+  - include_tasks: install.yml
+  when: ansible_facts.services["dynatracegateway.service"] is not defined

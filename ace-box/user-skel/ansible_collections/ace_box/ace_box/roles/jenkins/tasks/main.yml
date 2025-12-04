@@ -1,0 +1,159 @@
+# Copyright 2024 Dynatrace LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+- include_role:
+    name: dt-access-token
+  vars:
+    access_token_var_name: "{{ jenkins_dt_access_token_name }}"
+    access_token_scope: 
+      [
+        "slo.read",
+        "slo.write",
+        "CaptureRequestData",
+        "credentialVault.read",
+        "credentialVault.write",
+        "DataExport",
+        "DataPrivacy",
+        "ExternalSyntheticIntegration",
+        "ReadConfig",
+        "WriteConfig",
+        "settings.read",
+        "settings.write",
+        "events.ingest",
+      ]
+
+- name: Create namespace
+  kubernetes.core.k8s:
+    name: "{{ jenkins_namespace }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Add chart repo
+  kubernetes.core.helm_repository:
+    name: jenkins
+    repo_url: "https://charts.jenkins.io"
+
+- include_tasks: create-secret.yml
+
+- block:
+  - name: Source Gitea secrets
+    include_role:
+      name: gitea
+      tasks_from: source-secret
+  - set_fact:
+      git_username: "{{ gitea_username | default(None) }}"
+      git_password: "{{ gitea_password | default(None) }}"
+      git_access_token: "{{ gitea_access_token | default(None) }}"
+      git_domain: "gitea.{{ ingress_domain | default(None) }}"
+  when: git_flavor is defined and git_flavor == "GITEA"
+
+- block:
+  - name: Source Keptn secrets
+    include_role:
+      name: keptn
+      tasks_from: source-secret
+  - include_role:
+      name: keptn
+      tasks_from: source-endpoints
+
+- include_role:
+    name: private-registry
+    tasks_from: source-registry-url
+  when: registry_url is not defined
+
+- name: Source DT Synthetic node id
+  include_role:
+    name: dt-activegate-classic
+    tasks_from: source-node-id
+
+- block:
+  - name: Source OpenTelemetry Collector details
+    include_role:
+      name: otel-collector
+      tasks_from: source-endpoints
+  - set_fact:
+      otel_endpoint: "{{ otel_internal_endpoint | default(None) }}"
+
+- file:
+    path: "{{ role_path }}/files/helm"
+    state: directory
+
+- name: Template default Helm values file
+  template:
+    src: jenkins-values.yml.j2
+    dest: "{{ role_path }}/files/helm/jenkins-values.yml"
+    owner: "{{ ace_box_user }}"
+    group: "{{ ace_box_user }}"
+    mode: '0644'
+
+- name: Find all Jenkins Helm values files
+  find:
+    paths: "{{ role_path }}/files/helm"
+  register: jenkins_helm_value_files
+
+- name: Install
+  kubernetes.core.helm:
+    name: jenkins
+    chart_ref: jenkins/jenkins
+    chart_version: "{{ jenkins_helm_chart_version }}"
+    release_namespace: "{{ jenkins_namespace }}"
+    create_namespace: true
+    wait: true
+    wait_timeout: 30m
+    values_files: "{{ jenkins_helm_value_files | json_query('files[*].path') }}"
+  when: not jenkins_skip_install
+
+- include_tasks: create-token.yml
+  when: not jenkins_skip_install
+
+# - name: "Configure ClusterRoleBinding needed for k3s"
+#   shell: 
+#     cmd: "kubectl create clusterrolebinding jenkins --clusterrole cluster-admin --serviceaccount=jenkins:default"
+#   when: kubernetes_flavour == "k3s" 
+
+- name: Configure ClusterRoleBinding needed for k3s
+  kubernetes.core.k8s:
+    name: jenkins
+    api_version: rbac.authorization.k8s.io/v1
+    kind: ClusterRoleBinding
+    state: present
+    definition:
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: cluster-admin
+      subjects:
+      - kind: ServiceAccount
+        name: default
+        namespace: "{{ jenkins_namespace }}"
+
+  when: kubernetes_flavour == "k3s"
+
+# Include Dashboard values
+- set_fact:
+    include_dashboard_value_file: "{{ role_path }}/templates/jenkins-dashboard.yml.j2"
+
+- include_role:
+    name: dashboard
+    tasks_from: template-values-file
+
+# health check
+- include_role:
+    name: health-check
+    tasks_from: application-availability
+  vars:
+    application_domain: "{{ jenkins_domain }}"
+  when: not jenkins_skip_install

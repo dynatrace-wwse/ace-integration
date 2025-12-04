@@ -1,0 +1,100 @@
+# Copyright 2024 Dynatrace LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+- name: Add Mattermost chart repo
+  kubernetes.core.helm_repository:
+    name: mattermost
+    repo_url: "https://helm.mattermost.com"
+
+- name: Deploy Mattermost Team Edition
+  kubernetes.core.helm:
+    name: mattermost
+    chart_ref: mattermost/mattermost-team-edition
+    release_namespace: "{{ mattermost_namespace }}"
+    create_namespace: true
+    wait: true
+    wait_timeout: 10m
+    values:
+      image:
+        tag: "{{ mattermost_image_tag }}"
+      mysql:
+        mysqlUser: admin
+        mysqlPassword: samplePassword 
+      ingress:
+        enabled: true
+        hosts:
+          - "mattermost.{{ ingress_domain }}"
+        annotations:
+          kubernetes.io/ingress.class: "{{ ingress_class }}"
+      extraEnvVars:
+        - name: MM_SERVICESETTINGS_ENABLELOCALMODE
+          value: "true"
+        - name: MM_SERVICESETTINGS_ENABLEUSERACCESSTOKENS
+          value: "true"
+
+- name: Wait for Deployment ready state
+  kubernetes.core.k8s_info:
+    kind: Deployment
+    wait: yes
+    label_selectors:
+      - "app.kubernetes.io/instance=mattermost"
+    namespace: "{{ mattermost_namespace }}"
+    wait_sleep: 10
+    wait_timeout: 300
+
+- include_tasks: create-secret.yml
+
+- include_tasks: source-secret.yml
+
+- name: Mattermost - Ensure admin user
+  include_role:
+    name: mattermost
+    tasks_from: ensure-admin
+  vars:
+    mm_admin_email: "{{ mattermost_admin_email }}"
+    mm_admin_name: "{{ mattermost_admin_name }}"
+    mm_admin_password: "{{ mattermost_password }}"
+
+- name: Mattermost - Ensure admin token
+  include_role:
+    name: mattermost
+    tasks_from: ensure-token
+  vars:
+    mm_user_name: "{{ mattermost_admin_name }}"
+    mm_token_name: "{{ mattermost_token_name }}"
+
+- name: Mattermost - Ensure team
+  include_role:
+    name: mattermost
+    tasks_from: ensure-team
+  vars:
+    mm_team_name: "{{ mattermost_team_name }}"
+    mm_admin_token: "{{ mm_token }}"
+    mm_team_display_name: "{{ mattermost_team_name }}"
+
+# Include Dashboard values
+- set_fact:
+    include_dashboard_value_file: "{{ role_path }}/templates/mattermost-dashboard.yml.j2"
+
+- include_role:
+    name: dashboard
+    tasks_from: template-values-file
+
+# health check
+- include_role:
+    name: health-check
+    tasks_from: application-availability
+  vars:
+    application_domain: "{{ mattermost_domain }}"

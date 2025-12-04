@@ -1,0 +1,25 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-server-http-ingress
+  namespace: argocd
+  annotations:
+    {% if kubernetes_flavour == 'microk8s' %}
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    {% elif kubernetes_flavour == 'k3s' %}
+    traefik.ingress.kubernetes.io/router.entrypoints: "web"
+    {% endif %}
+spec:
+  ingressClassName: "{{ ingress_class }}"
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: argocd-server
+            port:
+              name: http
+    host: "argocd.{{ ingress_domain }}"

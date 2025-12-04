@@ -1,0 +1,28 @@
+# Copyright 2024 Dynatrace LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+jenkins_helm_chart_version: "4.1.17"
+jenkins_namespace: "jenkins"
+jenkins_version: "2.346.3-2-lts"
+jenkins_username: dynatrace
+git_org_demo: "demo"
+git_repo_demo: "ace"
+git_repo_monaco: "monaco"
+jenkins_skip_install: False
+jenkins_dt_access_token_name: "ace_box_jenkins_api_token"
+jenkins_monaco_container_image: "dynatraceace/monaco-runner:release-v1.6.0"
+jenkins_monaco_v2_container_image: "dynatrace/dynatrace-configuration-as-code:2.17.4"
+jenkins_dta_container_image: "dynatraceace/dt-automation-cli:latest"
+jenkins_domain: "jenkins.{{ ingress_domain }}"

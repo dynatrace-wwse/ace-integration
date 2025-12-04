@@ -1,0 +1,32 @@
+# Copyright 2024 Dynatrace LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+keptn_version: "1.0.0"
+keptn_dynatrace_service_version: "0.26.0"
+keptn_namespace: "keptn"
+keptn_ingress_domain: "keptn.{{ ingress_domain }}"
+keptn_cli_download_location: "/tmp/keptn"
+# uncomment to give keptn the cloud automation look and feel
+keptn_look_and_feel_url: "https://d2ixiz0hn5ywb5.cloudfront.net/branding.zip"
+keptn_gitea_provision_service_version: "0.1.1"
+keptn_jmeter_service_enabled: false
+keptn_helm_service_enabled: false
+keptn_synthetic_service_enabled: false
+keptn_test_collector_service_enabled: false
+keptn_job_executor_service_enabled: false
+keptn_job_executor_service_version: "0.2.3"
+keptn_job_executor_service_namespace: "keptn-jes"
+keptn_job_executor_service_subscriptions: "sh.keptn.event.remote-task.triggered"
+keptn_dt_access_token_name: "ace_box_keptn_api_token"

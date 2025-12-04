@@ -1,0 +1,29 @@
+# Copyright 2024 Dynatrace LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+image: curlimages/curl:8.00.1
+build_version: 8.00.1
+version: 8.00.1
+# If dt_release_product is empty Helm release name will be used.
+# For certain scenarios dt_release_product need to be aligned
+# across Helm releases e.g. canary deployments
+dt_release_product: null
+dt_tags: ""
+dt_custom_prop: ""
+dt_owner: ace-box
+load_gen_endpoint: null
+
+ingress:
+  class: public # microk8s >1.20 expects class "public"

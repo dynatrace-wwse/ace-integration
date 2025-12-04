@@ -1,0 +1,71 @@
+# Copyright 2024 Dynatrace LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+spec:
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+        app.kubernetes.io/name: mongodb
+        app.kubernetes.io/part-of: easytravel
+    spec:
+      containers:
+        - image: dynatrace/easytravel-mongodb:{{ .Values.easytravel.images.tag }}
+          name: mongodb
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 27017
+              protocol: TCP
+            - containerPort: 28017
+              protocol: TCP
+          resources:
+            requests:
+              memory: "100Mi"
+            limits:
+              memory: "100Mi"
+          env:
+            - name: DT_RELEASE_VERSION
+              value: {{ .Values.easytravel.images.tag }}
+            - name: DT_RELEASE_BUILD_VERSION
+              value: {{ .Values.easytravel.images.tag }}
+            - name: DT_RELEASE_STAGE
+              value: {{ .Release.Namespace }}
+            - name: DT_RELEASE_PRODUCT
+              value: {{ .Release.Name }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+spec:
+  ports:
+    - name: "27017"
+      port: 27017
+      protocol: TCP
+      targetPort: 27017
+    - name: "28017"
+      port: 28017
+      protocol: TCP
+      targetPort: 28017
+  selector:
+    app: mongodb
+  type: ClusterIP

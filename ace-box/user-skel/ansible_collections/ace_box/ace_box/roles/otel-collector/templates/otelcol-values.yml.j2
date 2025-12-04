@@ -1,0 +1,64 @@
+# Check https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-collector/values.yaml
+# Valid values are "daemonset", "deployment", and "statefulset".
+mode: "deployment"
+
+config:
+  exporters:
+    otlphttp:
+      endpoint: "{{ dynatrace_tenant_url | default(None) }}/api/v2/otlp"
+      headers:
+        Authorization: "Api-Token {{ vars[otelcol_dt_access_token_name] | default(None) }}"
+    #logging:
+    #  loglevel: debug
+  extensions:
+    health_check: {}
+    memory_ballast: {}
+  processors:
+    cumulativetodelta:
+    batch: {}
+    memory_limiter: null
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: ${env:MY_POD_IP}:4317
+        http:
+          endpoint: ${env:MY_POD_IP}:4318
+  service:
+    telemetry:
+      metrics:
+        address: ${env:MY_POD_IP}:8888
+    extensions:
+      - health_check
+      - memory_ballast
+    pipelines:
+      traces:
+        receivers: [otlp]
+        processors: []
+        exporters: [otlphttp]
+      metrics:
+        receivers: [otlp]
+        processors: [cumulativetodelta]
+        exporters: [otlphttp]
+      logs:
+        receivers: [otlp]
+        processors: []
+        exporters: [otlphttp]
+
+image:
+  repository: otel/opentelemetry-collector-contrib
+  pullPolicy: IfNotPresent
+  tag: "{{ otelcol_image_tag }}"
+  digest: ""
+
+
+ingress:
+  enabled: true
+  annotations: {}
+  ingressClassName: public
+  hosts:
+    - host: "{{ otelcol_ingress_domain }}"
+      paths:
+        - path: /
+          pathType: Prefix
+          port: 4318

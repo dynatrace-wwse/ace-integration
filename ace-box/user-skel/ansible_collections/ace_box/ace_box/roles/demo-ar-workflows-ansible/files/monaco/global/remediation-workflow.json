@@ -1,0 +1,106 @@
+{
+  "title": "{{ .name }}",
+  "taskDefaults": {},
+  "usages": [],
+  "description": "",
+  "labels": {},
+  "isPrivate": false,
+  "triggerType": "Event",
+  "schemaVersion": 3,
+  "trigger": {
+    "eventTrigger": {
+      "isActive": true,
+      "filterQuery": "event.kind == \"DAVIS_PROBLEM\" AND (event.category == \"ERROR\") AND (isNotNull(root_cause_entity_id)) AND (matchesValue(entity_tags, \"[Environment]DT_RELEASE_STAGE:canary-jenkins\"))",
+      "uniqueExpression": "{{`{{ event()[\"event.id\"] }}-{{ \"open\" if event()[\"event.status_transition\"] in (\"CREATED\", \"UPDATED\", \"REOPENED\", \"REFRESHED\") else \"resolved\" }}-{{ event()[\"dt.davis.last_reopen_timestamp\"] }}`}}",
+      "triggerConfiguration": {
+        "type": "davis-problem",
+        "value": {
+          "categories": {
+            "error": true
+          },
+          "entityTags": {
+            "[Environment]DT_RELEASE_STAGE": ["canary-jenkins"]
+          },
+          "customFilter": "isNotNull(root_cause_entity_id)",
+          "onProblemClose": true,
+          "entityTagsMatch": "any"
+        }
+      }
+    }
+  },
+  "tasks": {
+    "detect_remediation_actions": {
+      "name": "detect_remediation_actions",
+      "input": {
+        "query": "{{`fetch events\n| filter in(event.id, array(\"{{ event()['dt.davis.event_ids'] | join('\\\", \\\"') }}\")) and isNotNull(remediationAction)\n| sort timestamp desc\n| limit 1`}}"
+      },
+      "action": "dynatrace.automations:execute-dql-query",
+      "position": {
+        "x": 0,
+        "y": 1
+      },
+      "conditions": {
+        "custom": "{{`{{ event()['event.status'] == \"ACTIVE\" }}`}}",
+        "states": {}
+      },
+      "description": "Executes DQL query",
+      "predecessors": []
+    },
+    "trigger_ansible_remediation": {
+      "name": "trigger_ansible_remediation",
+      "description": "Launch a job template in Red Hat Ansible Automation Controller",
+      "action": "dynatrace.redhat.ansible:launch-job-template",
+      "input": {
+        "templateId": "{{`{{ result(\"detect_remediation_actions\").records[0].remediationAction }}`}}",
+        "connectionId": "{{ .ansibleConnectionId }}"
+      },
+      "position": {
+        "x": 0,
+        "y": 2
+      },
+      "predecessors": ["detect_remediation_actions"],
+      "conditions": {
+        "states": {
+          "detect_remediation_actions": "SUCCESS"
+        }
+      }
+    },
+    "update_problem_on_remediation_start": {
+      "name": "update_problem_on_remediation_start",
+      "input": {
+        "script": "import { execution } from '@dynatrace-sdk/automation-utils';\nimport { problemsClient } from '@dynatrace-sdk/client-classic-environment-v2';\n\nconst main = async ({ execution_id }) => {\n  // Get details of current workflow\n  const ex = await execution(execution_id);\n  const event = ex?.params?.event || {};\n  const problemId = event['event.id'];\n\n  const config = {\n    problemId,\n    body: {\n      context: \"ACE-Box - Auto Remediation\",\n      message: \"Remediation action triggered!\"\n    }\n  }\n  console.log(config)\n  await problemsClient.createComment(config);\n}\n\nexport { main as default };\n"
+      },
+      "action": "dynatrace.automations:run-javascript",
+      "position": {
+        "x": 0,
+        "y": 3
+      },
+      "conditions": {
+        "states": {
+          "trigger_ansible_remediation": "SUCCESS"
+        }
+      },
+      "description": "Build a custom task running js Code",
+      "predecessors": ["trigger_ansible_remediation"]
+    },
+    "get_owners": {
+      "name": "get_owners",
+      "input": {
+        "entityIds": "{{`{{ event()['root_cause_entity_id'] }}`}}",
+        "responsibilities": []
+      },
+      "action": "dynatrace.ownership:get-ownership-from-entity",
+      "position": {
+        "x": 1,
+        "y": 2
+      },
+      "conditions": {
+        "states": {
+          "detect_remediation_actions": "SUCCESS"
+        }
+      },
+      "description": "Retrieves entity and extracts ownership data from it.",
+      "predecessors": ["detect_remediation_actions"]
+    }
+  }
+}
