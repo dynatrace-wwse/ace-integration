@@ -5,9 +5,9 @@ source .devcontainer/util/source_framework.sh
 
 setUpTerminal
 
-#startKindCluster
+startKindCluster
 
-#installK9s
+installK9s
 
 #installMkdocs
 
@@ -18,6 +18,10 @@ setUpTerminal
 installAceCli
 
 configureAceDT
+
+ace install app_easytravel
+
+# 
 # If the Codespace was created via Workflow end2end test will be done, otherwise
 # it'll verify if there are error in the logs and will show them in the greeting as well a monitoring 
 # notification will be sent on the instantiation details
