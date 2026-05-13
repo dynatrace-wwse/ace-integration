@@ -8,6 +8,6 @@ assertAceVersion "0.2.0"
 
 assertRunningPod easytravel angular-frontend
 
-assertRunningApp 30100
+assertRunningApp easytravel
 
 
